@@ -1,44 +1,55 @@
 package br.ufal.ic.p2.bikeshare;
 
-/**
- Facade
- */
+import br.ufal.ic.p2.bikeshare.excecoes.BikeShareException;
+import br.ufal.ic.p2.bikeshare.servicos.ServicoSistema;
+import br.ufal.ic.p2.bikeshare.servicos.ServicoUsuario;
+
 public class Facade {
 
     private static final String AINDA_NAO_IMPLEMENTADO = "Ainda não implementado.";
+
+    private final ServicoSistema servicoSistema;
+    private final ServicoUsuario servicoUsuario;
+
+    public Facade() throws BikeShareException {
+        this.servicoSistema = new ServicoSistema();
+        this.servicoUsuario = new ServicoUsuario(this.servicoSistema);
+    }
 
     // =====================================================================
     // US1 - Cadastro de usuario
     // =====================================================================
 
-    public String criarUsuario(String nome, String email, String senha, String tipo, String cpfOuCnpj) {
-        throw new UnsupportedOperationException(AINDA_NAO_IMPLEMENTADO);
+    public String criarUsuario(String nome, String email, String senha, String tipo, String cpfOuCnpj)
+            throws BikeShareException {
+        return servicoUsuario.criarPessoaFisica(nome, email, senha, tipo, cpfOuCnpj);
     }
 
-    public String criarUsuario(String nome, String email, String senha, String tipo, String cnpj, String razaoSocial) {
-        throw new UnsupportedOperationException(AINDA_NAO_IMPLEMENTADO);
+    public String criarUsuario(String nome, String email, String senha, String tipo, String cnpj, String razaoSocial)
+            throws BikeShareException {
+        return servicoUsuario.criarPessoaJuridica(nome, email, senha, tipo, cnpj, razaoSocial);
     }
 
     public String criarUsuario(String nome, String email, String senha, String tipo, String cpf,
-                                String plano, String mensalidade) {
-        throw new UnsupportedOperationException(AINDA_NAO_IMPLEMENTADO);
+            String plano, String mensalidade) throws BikeShareException {
+        return servicoUsuario.criarPessoaFisica(nome, email, senha, tipo, cpf, plano, mensalidade);
     }
 
     public String criarUsuario(String nome, String email, String senha, String tipo, String cnpj,
-                                String razaoSocial, String plano, String mensalidade) {
-        throw new UnsupportedOperationException(AINDA_NAO_IMPLEMENTADO);
+            String razaoSocial, String plano, String mensalidade) throws BikeShareException {
+        return servicoUsuario.criarPessoaJuridica(nome, email, senha, tipo, cnpj, razaoSocial, plano, mensalidade);
     }
 
     // =====================================================================
     // US2 - Consulta de usuario
     // =====================================================================
 
-    public String getAtributoUsuario(String usuario, String atributo) {
-        throw new UnsupportedOperationException(AINDA_NAO_IMPLEMENTADO);
+    public String getAtributoUsuario(String usuario, String atributo) throws BikeShareException {
+        return servicoUsuario.getAtributoUsuario(usuario, atributo);
     }
 
-    public String getUsuarioPorEmail(String email) {
-        throw new UnsupportedOperationException(AINDA_NAO_IMPLEMENTADO);
+    public String getUsuarioPorEmail(String email) throws BikeShareException {
+        return servicoUsuario.getUsuarioPorEmail(email);
     }
 
     // =====================================================================
@@ -193,11 +204,11 @@ public class Facade {
     // Ciclo de vida do sistema
     // =====================================================================
 
-    public void zerarSistema() {
-        throw new UnsupportedOperationException(AINDA_NAO_IMPLEMENTADO);
+    public void zerarSistema() throws BikeShareException {
+        servicoSistema.zerarSistema();
     }
 
-    public void encerrarSistema() {
-        throw new UnsupportedOperationException(AINDA_NAO_IMPLEMENTADO);
+    public void encerrarSistema() throws BikeShareException {
+        servicoSistema.encerrarSistema();
     }
 }
