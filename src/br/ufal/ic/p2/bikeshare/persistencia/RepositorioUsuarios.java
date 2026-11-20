@@ -83,6 +83,27 @@ public class RepositorioUsuarios implements Serializable {
     }
 
     /**
+     * Atualiza o indice de emails quando um usuario altera o seu endereco de email.
+     *
+     * @param emailAnterior email previamente associado ao usuario
+     * @param usuario       usuario ja atualizado com o novo email
+     */
+    public void atualizarEmail(String emailAnterior, Usuario usuario) {
+        idsPorEmailNormalizado.remove(normalizarEmail(emailAnterior));
+        idsPorEmailNormalizado.put(normalizarEmail(usuario.getEmail()), usuario.getId());
+    }
+
+    /**
+     * Remove um usuario do repositorio e libera seu email, mantendo o contador de IDs intacto.
+     *
+     * @param usuario usuario a remover
+     */
+    public void remover(Usuario usuario) {
+        usuariosPorId.remove(usuario.getId());
+        idsPorEmailNormalizado.remove(normalizarEmail(usuario.getEmail()));
+    }
+
+    /**
      * Remove todos os usuarios cadastrados e reinicia o contador de identificadores.
      */
     public void limpar() {

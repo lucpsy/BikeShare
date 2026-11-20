@@ -10,13 +10,25 @@ public class EstadoSistema implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private final RepositorioUsuarios repositorioUsuarios;
+    private final RepositorioEstacoes repositorioEstacoes;
+    private final RepositorioBicicletas repositorioBicicletas;
 
     public EstadoSistema() {
         this.repositorioUsuarios = new RepositorioUsuarios();
+        this.repositorioEstacoes = new RepositorioEstacoes();
+        this.repositorioBicicletas = new RepositorioBicicletas();
     }
 
     public RepositorioUsuarios getRepositorioUsuarios() {
         return repositorioUsuarios;
+    }
+
+    public RepositorioEstacoes getRepositorioEstacoes() {
+        return repositorioEstacoes;
+    }
+
+    public RepositorioBicicletas getRepositorioBicicletas() {
+        return repositorioBicicletas;
     }
 
     /**
@@ -24,5 +36,7 @@ public class EstadoSistema implements Serializable {
      */
     public void limpar() {
         repositorioUsuarios.limpar();
+        repositorioEstacoes.limpar();
+        repositorioBicicletas.limpar();
     }
 }

@@ -1,20 +1,37 @@
 package br.ufal.ic.p2.bikeshare.servicos;
 
 import br.ufal.ic.p2.bikeshare.excecoes.BikeShareException;
+import br.ufal.ic.p2.bikeshare.excecoes.CapacidadeNaoNumericaException;
+import br.ufal.ic.p2.bikeshare.excecoes.CapacidadeNaoPositivaException;
+import br.ufal.ic.p2.bikeshare.excecoes.CapacidadeNulaException;
+import br.ufal.ic.p2.bikeshare.excecoes.ChavePixNulaException;
 import br.ufal.ic.p2.bikeshare.excecoes.CnpjNuloException;
 import br.ufal.ic.p2.bikeshare.excecoes.CpfNuloException;
 import br.ufal.ic.p2.bikeshare.excecoes.EmailInvalidoException;
 import br.ufal.ic.p2.bikeshare.excecoes.EmailNuloException;
+import br.ufal.ic.p2.bikeshare.excecoes.EnderecoNuloException;
+import br.ufal.ic.p2.bikeshare.excecoes.IdentificacaoBicicletaNulaException;
+import br.ufal.ic.p2.bikeshare.excecoes.IdentificacaoEstacaoNulaException;
 import br.ufal.ic.p2.bikeshare.excecoes.IdentificacaoUsuarioNulaException;
 import br.ufal.ic.p2.bikeshare.excecoes.MensalidadeNaoNumericaException;
 import br.ufal.ic.p2.bikeshare.excecoes.MensalidadeNegativaException;
 import br.ufal.ic.p2.bikeshare.excecoes.MensalidadeNulaException;
+import br.ufal.ic.p2.bikeshare.excecoes.NivelBateriaInvalidoException;
+import br.ufal.ic.p2.bikeshare.excecoes.NivelBateriaNaoNumericoException;
+import br.ufal.ic.p2.bikeshare.excecoes.NivelBateriaNuloException;
 import br.ufal.ic.p2.bikeshare.excecoes.NomeNuloException;
+import br.ufal.ic.p2.bikeshare.excecoes.NumeroCartaoNuloException;
 import br.ufal.ic.p2.bikeshare.excecoes.PlanoInvalidoException;
 import br.ufal.ic.p2.bikeshare.excecoes.PlanoNaoPossuiMensalidadeException;
 import br.ufal.ic.p2.bikeshare.excecoes.RazaoSocialNulaException;
 import br.ufal.ic.p2.bikeshare.excecoes.SenhaNulaException;
 import br.ufal.ic.p2.bikeshare.excecoes.TipoUsuarioInvalidoException;
+import br.ufal.ic.p2.bikeshare.excecoes.ValidadeCartaoInvalidaException;
+import br.ufal.ic.p2.bikeshare.excecoes.ValidadeCartaoNulaException;
+import br.ufal.ic.p2.bikeshare.excecoes.ValorNaoNumericoException;
+import br.ufal.ic.p2.bikeshare.excecoes.ValorNaoPositivoException;
+import br.ufal.ic.p2.bikeshare.excecoes.ValorNuloException;
+import br.ufal.ic.p2.bikeshare.modelos.BicicletaEletrica;
 import br.ufal.ic.p2.bikeshare.modelos.Plano;
 import br.ufal.ic.p2.bikeshare.modelos.PlanoAssinante;
 import br.ufal.ic.p2.bikeshare.modelos.PlanoAvulso;
@@ -31,6 +48,8 @@ public final class ValidadorEntrada {
 
     private static final Pattern PADRAO_EMAIL = Pattern.compile("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$");
     private static final Pattern PADRAO_NUMERO_DECIMAL = Pattern.compile("^[+-]?\\d+([.,]\\d+)?$");
+    private static final Pattern PADRAO_INTEIRO = Pattern.compile("^[+-]?\\d+$");
+    private static final Pattern PADRAO_VALIDADE_CARTAO = Pattern.compile("^(0[1-9]|1[0-2])/\\d{4}$");
 
     private ValidadorEntrada() {
     }
@@ -96,28 +115,56 @@ public final class ValidadorEntrada {
         }
     }
 
+    public static void validarChavePix(String chavePix) throws ChavePixNulaException {
+        if (estaVazio(chavePix)) {
+            throw new ChavePixNulaException();
+        }
+    }
+
+    public static void validarNumeroCartao(String numeroCartao) throws NumeroCartaoNuloException {
+        if (estaVazio(numeroCartao)) {
+            throw new NumeroCartaoNuloException();
+        }
+    }
+
+    public static void validarValidadeCartao(String validade)
+            throws ValidadeCartaoNulaException, ValidadeCartaoInvalidaException {
+        if (estaVazio(validade)) {
+            throw new ValidadeCartaoNulaException();
+        }
+        if (!PADRAO_VALIDADE_CARTAO.matcher(validade.trim()).matches()) {
+            throw new ValidadeCartaoInvalidaException();
+        }
+    }
+
+    public static void validarEndereco(String endereco) throws EnderecoNuloException {
+        if (estaVazio(endereco)) {
+            throw new EnderecoNuloException();
+        }
+    }
+
+    public static void validarIdentificacaoEstacao(String idEstacao) throws IdentificacaoEstacaoNulaException {
+        if (estaVazio(idEstacao)) {
+            throw new IdentificacaoEstacaoNulaException();
+        }
+    }
+
+    public static void validarIdentificacaoBicicleta(String idBicicleta) throws IdentificacaoBicicletaNulaException {
+        if (estaVazio(idBicicleta)) {
+            throw new IdentificacaoBicicletaNulaException();
+        }
+    }
+
     /**
      * Converte e valida uma string de mensalidade em {@link BigDecimal} nao-negativo.
-     *
-     * @param mensalidade representacao textual da mensalidade
-     * @return valor numerico validado
-     * @throws MensalidadeNulaException        se a mensalidade estiver nula ou em branco
-     * @throws MensalidadeNaoNumericaException se o formato nao for numerico valido
-     * @throws MensalidadeNegativaException    se o valor for negativo
      */
     public static BigDecimal parsearMensalidade(String mensalidade)
             throws MensalidadeNulaException, MensalidadeNaoNumericaException, MensalidadeNegativaException {
         if (estaVazio(mensalidade)) {
             throw new MensalidadeNulaException();
         }
-        String texto = mensalidade.trim();
-        if (!PADRAO_NUMERO_DECIMAL.matcher(texto).matches()) {
-            throw new MensalidadeNaoNumericaException();
-        }
-        BigDecimal valor;
-        try {
-            valor = new BigDecimal(texto.replace(',', '.'));
-        } catch (NumberFormatException e) {
+        BigDecimal valor = tentarParsearDecimal(mensalidade);
+        if (valor == null) {
             throw new MensalidadeNaoNumericaException();
         }
         if (valor.compareTo(BigDecimal.ZERO) < 0) {
@@ -127,12 +174,61 @@ public final class ValidadorEntrada {
     }
 
     /**
+     * Converte e valida uma string numerica em {@link BigDecimal} estritamente positivo.
+     */
+    public static BigDecimal parsearValorPositivo(String valorTexto)
+            throws ValorNuloException, ValorNaoNumericoException, ValorNaoPositivoException {
+        if (estaVazio(valorTexto)) {
+            throw new ValorNuloException();
+        }
+        BigDecimal valor = tentarParsearDecimal(valorTexto);
+        if (valor == null) {
+            throw new ValorNaoNumericoException();
+        }
+        if (valor.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new ValorNaoPositivoException();
+        }
+        return valor;
+    }
+
+    /**
+     * Converte e valida a capacidade de uma estacao como inteiro estritamente positivo.
+     */
+    public static int parsearCapacidade(String capacidadeTexto)
+            throws CapacidadeNulaException, CapacidadeNaoNumericaException, CapacidadeNaoPositivaException {
+        if (estaVazio(capacidadeTexto)) {
+            throw new CapacidadeNulaException();
+        }
+        Integer valor = tentarParsearInteiro(capacidadeTexto);
+        if (valor == null) {
+            throw new CapacidadeNaoNumericaException();
+        }
+        if (valor <= 0) {
+            throw new CapacidadeNaoPositivaException();
+        }
+        return valor;
+    }
+
+    /**
+     * Converte e valida o nivel de bateria de uma bicicleta eletrica como inteiro entre 0 e 100.
+     */
+    public static int parsearNivelBateria(String nivelBateriaTexto)
+            throws NivelBateriaNuloException, NivelBateriaNaoNumericoException, NivelBateriaInvalidoException {
+        if (estaVazio(nivelBateriaTexto)) {
+            throw new NivelBateriaNuloException();
+        }
+        Integer valor = tentarParsearInteiro(nivelBateriaTexto);
+        if (valor == null) {
+            throw new NivelBateriaNaoNumericoException();
+        }
+        if (valor < BicicletaEletrica.BATERIA_MINIMA || valor > BicicletaEletrica.BATERIA_MAXIMA) {
+            throw new NivelBateriaInvalidoException();
+        }
+        return valor;
+    }
+
+    /**
      * Cria o objeto de dominio {@link Plano} correspondente ao nome e mensalidade informados.
-     *
-     * @param nomePlano   nome exato do plano ({@code avulso} ou {@code assinante})
-     * @param mensalidade valor da mensalidade (obrigatorio para {@code assinante}, deve ser vazio para {@code avulso})
-     * @return instancia concreta de {@link Plano}
-     * @throws BikeShareException se o plano ou a mensalidade forem invalidos
      */
     public static Plano criarPlano(String nomePlano, String mensalidade) throws BikeShareException {
         TipoPlano tipoPlano = TipoPlano.deCodigo(nomePlano);
@@ -147,6 +243,30 @@ public final class ValidadorEntrada {
                 return new PlanoAssinante(valorMensalidade);
             default:
                 throw new PlanoInvalidoException();
+        }
+    }
+
+    private static BigDecimal tentarParsearDecimal(String texto) {
+        String normalizado = texto.trim();
+        if (!PADRAO_NUMERO_DECIMAL.matcher(normalizado).matches()) {
+            return null;
+        }
+        try {
+            return new BigDecimal(normalizado.replace(',', '.'));
+        } catch (NumberFormatException e) {
+            return null;
+        }
+    }
+
+    private static Integer tentarParsearInteiro(String texto) {
+        String normalizado = texto.trim();
+        if (!PADRAO_INTEIRO.matcher(normalizado).matches()) {
+            return null;
+        }
+        try {
+            return Integer.valueOf(normalizado);
+        } catch (NumberFormatException e) {
+            return null;
         }
     }
 }

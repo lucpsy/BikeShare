@@ -1,5 +1,6 @@
 package br.ufal.ic.p2.bikeshare.modelos;
 
+import br.ufal.ic.p2.bikeshare.excecoes.BikeShareException;
 import br.ufal.ic.p2.bikeshare.excecoes.UsuarioNaoUsaCartaoException;
 import br.ufal.ic.p2.bikeshare.excecoes.UsuarioNaoUsaPixException;
 import br.ufal.ic.p2.bikeshare.excecoes.UsuarioNaoUsaSaldoException;
@@ -34,6 +35,25 @@ public abstract class MetodoPagamento implements Serializable {
     }
 
     public BigDecimal getSaldo() throws UsuarioNaoUsaSaldoException {
+        throw new UsuarioNaoUsaSaldoException();
+    }
+
+    /**
+     * Valida se este metodo de pagamento permite operacoes com saldo pre-carregado.
+     *
+     * @throws UsuarioNaoUsaSaldoException se o metodo nao for saldo pre-carregado
+     */
+    public void validarUsoDeSaldo() throws UsuarioNaoUsaSaldoException {
+        throw new UsuarioNaoUsaSaldoException();
+    }
+
+    /**
+     * Adiciona credito ao saldo pre-carregado, quando aplicavel.
+     *
+     * @param valor valor positivo a creditar
+     * @throws BikeShareException se o metodo nao usar saldo ou o valor for invalido
+     */
+    public void adicionarSaldo(BigDecimal valor) throws BikeShareException {
         throw new UsuarioNaoUsaSaldoException();
     }
 }

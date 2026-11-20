@@ -9,6 +9,8 @@ import br.ufal.ic.p2.bikeshare.excecoes.PlanoInvalidoException;
 import br.ufal.ic.p2.bikeshare.excecoes.SenhaNulaException;
 import br.ufal.ic.p2.bikeshare.excecoes.UsuarioNaoEhPessoaFisicaException;
 import br.ufal.ic.p2.bikeshare.excecoes.UsuarioNaoEhPessoaJuridicaException;
+import br.ufal.ic.p2.bikeshare.excecoes.UsuarioNaoUsaSaldoException;
+import br.ufal.ic.p2.bikeshare.excecoes.ValorMetodoPagamentoInvalidoException;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -22,12 +24,13 @@ public abstract class Usuario implements Serializable {
     private static final String SEM_ALUGUEL_ATIVO = "nenhum";
 
     private final String id;
-    private final String nome;
-    private final String email;
-    private final String senha;
+    private String nome;
+    private String email;
+    private String senha;
     private final EstadoUsuario estado;
-    private final Plano plano;
-    private final MetodoPagamento metodoPagamento;
+    private Plano plano;
+    private MetodoPagamento metodoPagamento;
+    private final PagamentoSaldoPreCarregado carteiraSaldo;
     private final String aluguelAtivo;
     private final BigDecimal totalPendencias;
 
@@ -54,6 +57,7 @@ public abstract class Usuario implements Serializable {
         this.estado = EstadoUsuario.ATIVO;
         this.plano = plano;
         this.metodoPagamento = new SemMetodoPagamento();
+        this.carteiraSaldo = new PagamentoSaldoPreCarregado();
         this.aluguelAtivo = null;
         this.totalPendencias = BigDecimal.ZERO;
     }
@@ -96,6 +100,60 @@ public abstract class Usuario implements Serializable {
 
     public String getAluguelAtivoFormatado() {
         return aluguelAtivo == null ? SEM_ALUGUEL_ATIVO : aluguelAtivo;
+    }
+
+    public boolean possuiAluguelAtivo() {
+        return aluguelAtivo != null;
+    }
+
+    public void alterarNome(String novoNome) throws NomeNuloException {
+        if (estaEmBranco(novoNome)) {
+            throw new NomeNuloException();
+        }
+        this.nome = novoNome;
+    }
+
+    public void alterarEmail(String novoEmail) throws EmailNuloException {
+        if (estaEmBranco(novoEmail)) {
+            throw new EmailNuloException();
+        }
+        this.email = novoEmail;
+    }
+
+    public void alterarSenha(String novaSenha) throws SenhaNulaException {
+        if (estaEmBranco(novaSenha)) {
+            throw new SenhaNulaException();
+        }
+        this.senha = novaSenha;
+    }
+
+    public void alterarPlano(Plano novoPlano) throws PlanoInvalidoException {
+        if (novoPlano == null) {
+            throw new PlanoInvalidoException();
+        }
+        this.plano = novoPlano;
+    }
+
+    public void definirMetodoPagamento(MetodoPagamento novoMetodo) throws ValorMetodoPagamentoInvalidoException {
+        if (novoMetodo == null) {
+            throw new ValorMetodoPagamentoInvalidoException();
+        }
+        this.metodoPagamento = novoMetodo;
+    }
+
+    /**
+     * Ativa o saldo pre-carregado como metodo de pagamento atual, preservando eventual saldo acumulado.
+     */
+    public void ativarSaldoPreCarregado() {
+        this.metodoPagamento = this.carteiraSaldo;
+    }
+
+    public void validarUsoDeSaldo() throws UsuarioNaoUsaSaldoException {
+        this.metodoPagamento.validarUsoDeSaldo();
+    }
+
+    public void recarregarSaldo(BigDecimal valor) throws BikeShareException {
+        this.metodoPagamento.adicionarSaldo(valor);
     }
 
     public abstract TipoUsuario getTipo();
