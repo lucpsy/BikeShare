@@ -1,11 +1,16 @@
 package br.ufal.ic.p2.bikeshare;
 
 import br.ufal.ic.p2.bikeshare.excecoes.BikeShareException;
+import br.ufal.ic.p2.bikeshare.servicos.ServicoAluguel;
 import br.ufal.ic.p2.bikeshare.servicos.ServicoBicicleta;
 import br.ufal.ic.p2.bikeshare.servicos.ServicoEstacao;
 import br.ufal.ic.p2.bikeshare.servicos.ServicoSistema;
 import br.ufal.ic.p2.bikeshare.servicos.ServicoUsuario;
 
+/**
+ * Facade do sistema BikeShare, responsavel por encaminhar cada operacao para o
+ * servico correspondente.
+ */
 public class Facade {
 
     private static final String AINDA_NAO_IMPLEMENTADO = "Ainda não implementado.";
@@ -14,12 +19,20 @@ public class Facade {
     private final ServicoUsuario servicoUsuario;
     private final ServicoEstacao servicoEstacao;
     private final ServicoBicicleta servicoBicicleta;
+    private final ServicoAluguel servicoAluguel;
 
+    /**
+     * Inicializa a fachada e todos os servicos do sistema, carregando eventual
+     * estado persistido.
+     *
+     * @throws BikeShareException se ocorrer erro ao carregar o estado persistido
+     */
     public Facade() throws BikeShareException {
         this.servicoSistema = new ServicoSistema();
         this.servicoUsuario = new ServicoUsuario(this.servicoSistema);
         this.servicoEstacao = new ServicoEstacao(this.servicoSistema);
         this.servicoBicicleta = new ServicoBicicleta(this.servicoSistema);
+        this.servicoAluguel = new ServicoAluguel(this.servicoSistema);
     }
 
     // =====================================================================
@@ -133,16 +146,17 @@ public class Facade {
     // US8 - Retirada de bicicleta
     // =====================================================================
 
-    public String retirarBicicleta(String usuario, String estacao, String bicicleta, String data) {
-        throw new UnsupportedOperationException(AINDA_NAO_IMPLEMENTADO);
+    public String retirarBicicleta(String usuario, String estacao, String bicicleta, String data)
+            throws BikeShareException {
+        return servicoAluguel.retirarBicicleta(usuario, estacao, bicicleta, data);
     }
 
     // =====================================================================
     // US9 - Devolucao de bicicleta
     // =====================================================================
 
-    public void devolverBicicleta(String aluguel, String estacao, String data) {
-        throw new UnsupportedOperationException(AINDA_NAO_IMPLEMENTADO);
+    public void devolverBicicleta(String aluguel, String estacao, String data) throws BikeShareException {
+        servicoAluguel.devolverBicicleta(aluguel, estacao, data);
     }
 
     // =====================================================================
@@ -157,8 +171,8 @@ public class Facade {
         throw new UnsupportedOperationException(AINDA_NAO_IMPLEMENTADO);
     }
 
-    public String getAtributoAluguel(String aluguel, String atributo) {
-        throw new UnsupportedOperationException(AINDA_NAO_IMPLEMENTADO);
+    public String getAtributoAluguel(String aluguel, String atributo) throws BikeShareException {
+        return servicoAluguel.getAtributoAluguel(aluguel, atributo);
     }
 
     // =====================================================================

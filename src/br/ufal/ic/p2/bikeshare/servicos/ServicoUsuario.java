@@ -6,6 +6,7 @@ import br.ufal.ic.p2.bikeshare.excecoes.EmailJaCadastradoException;
 import br.ufal.ic.p2.bikeshare.excecoes.UsuarioComAluguelEmAndamentoException;
 import br.ufal.ic.p2.bikeshare.excecoes.UsuarioNaoExisteException;
 import br.ufal.ic.p2.bikeshare.excecoes.ValorMetodoPagamentoInvalidoException;
+import br.ufal.ic.p2.bikeshare.modelos.ConfiguracaoSistema;
 import br.ufal.ic.p2.bikeshare.modelos.PagamentoCartao;
 import br.ufal.ic.p2.bikeshare.modelos.PagamentoPix;
 import br.ufal.ic.p2.bikeshare.modelos.PessoaFisica;
@@ -31,35 +32,67 @@ public class ServicoUsuario {
 
     private final ServicoSistema servicoSistema;
 
+    /**
+     * Cria o servico de usuarios vinculado ao gerenciador do ciclo de vida do sistema.
+     *
+     * @param servicoSistema servico que controla o estado e persistencia do sistema
+     */
     public ServicoUsuario(ServicoSistema servicoSistema) {
         this.servicoSistema = servicoSistema;
     }
 
     /**
      * Cadastra um usuario pessoa fisica no plano avulso padrao.
+     *
+     * @param nome  nome do usuario
+     * @param email endereco de email unico
+     * @param senha senha de acesso
+     * @param tipo  codigo textual do tipo de usuario ({@code pessoaFisica})
+     * @param cpf   CPF da pessoa fisica
+     * @return identificador sequencial gerado para o usuario
+     * @throws BikeShareException se algum dado for invalido ou o email ja estiver cadastrado
      */
     public String criarPessoaFisica(String nome, String email, String senha, String tipo, String cpf)
             throws BikeShareException {
         servicoSistema.garantirAtivo();
         validarDadosComuns(nome, email, senha, tipo, TipoUsuario.PESSOA_FISICA);
         ValidadorEntrada.validarCpf(cpf);
-        return registrarPessoaFisica(nome, email, senha, cpf, new PlanoAvulso());
+        return registrarPessoaFisica(nome, email, senha, cpf, criarPlanoAvulso());
     }
 
     /**
      * Cadastra um usuario pessoa fisica com plano e mensalidade informados explicitamente.
+     *
+     * @param nome        nome do usuario
+     * @param email       endereco de email unico
+     * @param senha       senha de acesso
+     * @param tipo        codigo textual do tipo de usuario ({@code pessoaFisica})
+     * @param cpf         CPF da pessoa fisica
+     * @param plano       nome do plano escolhido
+     * @param mensalidade mensalidade informada para o plano
+     * @return identificador sequencial gerado para o usuario
+     * @throws BikeShareException se algum dado for invalido ou o email ja estiver cadastrado
      */
     public String criarPessoaFisica(String nome, String email, String senha, String tipo, String cpf,
             String plano, String mensalidade) throws BikeShareException {
         servicoSistema.garantirAtivo();
         validarDadosComuns(nome, email, senha, tipo, TipoUsuario.PESSOA_FISICA);
         ValidadorEntrada.validarCpf(cpf);
-        Plano planoCriado = ValidadorEntrada.criarPlano(plano, mensalidade);
+        Plano planoCriado = ValidadorEntrada.criarPlano(plano, mensalidade, configuracao());
         return registrarPessoaFisica(nome, email, senha, cpf, planoCriado);
     }
 
     /**
      * Cadastra um usuario pessoa juridica no plano avulso padrao.
+     *
+     * @param nome        nome do usuario
+     * @param email       endereco de email unico
+     * @param senha       senha de acesso
+     * @param tipo        codigo textual do tipo de usuario ({@code pessoaJuridica})
+     * @param cnpj        CNPJ da pessoa juridica
+     * @param razaoSocial razao social da empresa
+     * @return identificador sequencial gerado para o usuario
+     * @throws BikeShareException se algum dado for invalido ou o email ja estiver cadastrado
      */
     public String criarPessoaJuridica(String nome, String email, String senha, String tipo,
             String cnpj, String razaoSocial) throws BikeShareException {
@@ -67,11 +100,22 @@ public class ServicoUsuario {
         validarDadosComuns(nome, email, senha, tipo, TipoUsuario.PESSOA_JURIDICA);
         ValidadorEntrada.validarCnpj(cnpj);
         ValidadorEntrada.validarRazaoSocial(razaoSocial);
-        return registrarPessoaJuridica(nome, email, senha, cnpj, razaoSocial, new PlanoAvulso());
+        return registrarPessoaJuridica(nome, email, senha, cnpj, razaoSocial, criarPlanoAvulso());
     }
 
     /**
      * Cadastra um usuario pessoa juridica com plano e mensalidade informados explicitamente.
+     *
+     * @param nome        nome do usuario
+     * @param email       endereco de email unico
+     * @param senha       senha de acesso
+     * @param tipo        codigo textual do tipo de usuario ({@code pessoaJuridica})
+     * @param cnpj        CNPJ da pessoa juridica
+     * @param razaoSocial razao social da empresa
+     * @param plano       nome do plano escolhido
+     * @param mensalidade mensalidade informada para o plano
+     * @return identificador sequencial gerado para o usuario
+     * @throws BikeShareException se algum dado for invalido ou o email ja estiver cadastrado
      */
     public String criarPessoaJuridica(String nome, String email, String senha, String tipo,
             String cnpj, String razaoSocial, String plano, String mensalidade)
@@ -80,12 +124,17 @@ public class ServicoUsuario {
         validarDadosComuns(nome, email, senha, tipo, TipoUsuario.PESSOA_JURIDICA);
         ValidadorEntrada.validarCnpj(cnpj);
         ValidadorEntrada.validarRazaoSocial(razaoSocial);
-        Plano planoCriado = ValidadorEntrada.criarPlano(plano, mensalidade);
+        Plano planoCriado = ValidadorEntrada.criarPlano(plano, mensalidade, configuracao());
         return registrarPessoaJuridica(nome, email, senha, cnpj, razaoSocial, planoCriado);
     }
 
     /**
      * Consulta o valor de um atributo especifico de um usuario cadastrado.
+     *
+     * @param idUsuario identificador do usuario
+     * @param atributo  nome exato do atributo solicitado
+     * @return representacao textual do atributo
+     * @throws BikeShareException se o usuario ou atributo for invalido
      */
     public String getAtributoUsuario(String idUsuario, String atributo) throws BikeShareException {
         servicoSistema.garantirAtivo();
@@ -95,6 +144,10 @@ public class ServicoUsuario {
 
     /**
      * Busca o identificador de um usuario cadastrado a partir do seu email.
+     *
+     * @param email endereco de email do usuario
+     * @return identificador do usuario correspondente
+     * @throws BikeShareException se o email for nulo ou nao corresponder a nenhum usuario
      */
     public String getUsuarioPorEmail(String email) throws BikeShareException {
         servicoSistema.garantirAtivo();
@@ -105,7 +158,12 @@ public class ServicoUsuario {
     }
 
     /**
-     * Altera um atributo simples do usuario (nome, email, senha, plano, saldo ou metodo de pagamento saldoPreCarregado).
+     * Altera um atributo simples do usuario (nome, email, senha, plano, saldo ou metodo saldoPreCarregado).
+     *
+     * @param idUsuario identificador do usuario
+     * @param atributo  nome do atributo a alterar
+     * @param valor     novo valor do atributo
+     * @throws BikeShareException se o usuario, atributo ou valor for invalido
      */
     public void alterarUsuario(String idUsuario, String atributo, String valor) throws BikeShareException {
         servicoSistema.garantirAtivo();
@@ -141,6 +199,12 @@ public class ServicoUsuario {
 
     /**
      * Altera o metodo de pagamento do usuario para Pix com a chave informada.
+     *
+     * @param idUsuario identificador do usuario
+     * @param atributo  deve ser {@code metodoPagamento}
+     * @param valor1    deve ser {@code pix}
+     * @param chave     chave Pix do usuario
+     * @throws BikeShareException se algum parametro for invalido
      */
     public void alterarUsuario(String idUsuario, String atributo, String valor1, String chave)
             throws BikeShareException {
@@ -159,6 +223,13 @@ public class ServicoUsuario {
 
     /**
      * Altera o metodo de pagamento do usuario para cartao com numero e validade informados.
+     *
+     * @param idUsuario identificador do usuario
+     * @param atributo  deve ser {@code metodoPagamento}
+     * @param valor1    deve ser {@code cartao}
+     * @param numero    numero do cartao
+     * @param validade  validade no formato {@code MM/AAAA}
+     * @throws BikeShareException se algum parametro for invalido
      */
     public void alterarUsuario(String idUsuario, String atributo, String valor1, String numero, String validade)
             throws BikeShareException {
@@ -178,6 +249,9 @@ public class ServicoUsuario {
 
     /**
      * Remove um usuario cadastrado, desde que nao possua aluguel em andamento.
+     *
+     * @param idUsuario identificador do usuario a remover
+     * @throws BikeShareException se o usuario nao existir ou possuir aluguel ativo
      */
     public void removerUsuario(String idUsuario) throws BikeShareException {
         servicoSistema.garantirAtivo();
@@ -206,14 +280,26 @@ public class ServicoUsuario {
         }
         switch (tipoPlano) {
             case AVULSO:
-                usuario.alterarPlano(new PlanoAvulso());
+                usuario.alterarPlano(criarPlanoAvulso());
                 break;
             case ASSINANTE:
-                usuario.alterarPlano(PlanoAssinante.padrao());
+                usuario.alterarPlano(criarPlanoAssinantePadrao());
                 break;
             default:
                 throw new AtributoNaoPodeSerAlteradoException();
         }
+    }
+
+    private PlanoAvulso criarPlanoAvulso() {
+        return new PlanoAvulso(configuracao().getTarifaMinutoAvulso());
+    }
+
+    private PlanoAssinante criarPlanoAssinantePadrao() throws BikeShareException {
+        return new PlanoAssinante(
+                configuracao().getMensalidadePadraoAssinante(),
+                configuracao().getFranquiaMinutosAssinante(),
+                configuracao().getTarifaMinutoExcedenteAssinante()
+        );
     }
 
     private void ativarSaldoPreCarregado(Usuario usuario, String tipoTexto) throws BikeShareException {
@@ -266,6 +352,10 @@ public class ServicoUsuario {
         if (repositorio().existeEmail(email)) {
             throw new EmailJaCadastradoException();
         }
+    }
+
+    private ConfiguracaoSistema configuracao() {
+        return servicoSistema.getEstado().getConfiguracao();
     }
 
     private RepositorioUsuarios repositorio() {

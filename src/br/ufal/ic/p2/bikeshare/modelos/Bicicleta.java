@@ -1,11 +1,13 @@
 package br.ufal.ic.p2.bikeshare.modelos;
 
 import br.ufal.ic.p2.bikeshare.excecoes.AtributoNaoExisteException;
+import br.ufal.ic.p2.bikeshare.excecoes.BicicletaNaoDisponivelException;
 import br.ufal.ic.p2.bikeshare.excecoes.BicicletaNaoPossuiBateriaException;
 import br.ufal.ic.p2.bikeshare.excecoes.BikeShareException;
 import br.ufal.ic.p2.bikeshare.excecoes.IdentificacaoBicicletaNulaException;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 
 /**
  * Entidade base que representa uma bicicleta cadastrada no sistema BikeShare.
@@ -19,6 +21,12 @@ public abstract class Bicicleta implements Serializable {
     private EstadoBicicleta estado;
     private String idEstacao;
 
+    /**
+     * Cria uma bicicleta no estado disponivel e sem estacao vinculada inicialmente.
+     *
+     * @param id identificador unico da bicicleta
+     * @throws IdentificacaoBicicletaNulaException se o identificador for nulo ou em branco
+     */
     protected Bicicleta(String id) throws IdentificacaoBicicletaNulaException {
         if (id == null || id.trim().isEmpty()) {
             throw new IdentificacaoBicicletaNulaException();
@@ -28,20 +36,35 @@ public abstract class Bicicleta implements Serializable {
         this.idEstacao = null;
     }
 
+    /**
+     * Retorna o identificador unico da bicicleta.
+     *
+     * @return identificador da bicicleta
+     */
     public String getId() {
         return id;
     }
 
+    /**
+     * Retorna o estado atual da bicicleta.
+     *
+     * @return estado da bicicleta
+     */
     public EstadoBicicleta getEstado() {
         return estado;
     }
 
+    /**
+     * Retorna o identificador da estacao onde a bicicleta esta estacionada ou {@code "nenhuma"}.
+     *
+     * @return identificador da estacao formatado
+     */
     public String getIdEstacaoFormatado() {
         return idEstacao == null ? SEM_ESTACAO : idEstacao;
     }
 
     /**
-     * Retorna o tipo da bicicleta.
+     * Retorna o tipo concreto da bicicleta.
      *
      * @return tipo de bicicleta
      */
@@ -58,7 +81,17 @@ public abstract class Bicicleta implements Serializable {
     }
 
     /**
-     * Indica se a bicicleta esta no estado disponivel (sem uso nem manutencao).
+     * Calcula eventual adicional tarifario especifico do tipo da bicicleta para a duracao da corrida.
+     *
+     * @param duracaoMinutos duracao total da corrida em minutos
+     * @return valor adicional monetario
+     */
+    public BigDecimal calcularAdicional(long duracaoMinutos) {
+        return BigDecimal.ZERO;
+    }
+
+    /**
+     * Indica se a bicicleta esta no estado disponivel.
      *
      * @return {@code true} se o estado atual for {@link EstadoBicicleta#DISPONIVEL}
      */
@@ -68,12 +101,43 @@ public abstract class Bicicleta implements Serializable {
 
     /**
      * Indica se a bicicleta esta apta a ser retirada por um usuario.
-     * Subtipos com restricoes adicionais (como bateria minima) devem sobrescrever este metodo.
      *
      * @return {@code true} se puder ser retirada
      */
     public boolean estaDisponivelParaRetirada() {
         return estaDisponivel();
+    }
+
+    /**
+     * Valida se a bicicleta atende a todas as condicoes especificas para retirada.
+     *
+     * @throws BikeShareException se a bicicleta estiver indisponivel ou sem bateria suficiente
+     */
+    public void validarAptidaoParaRetirada() throws BikeShareException {
+        if (!estaDisponivel()) {
+            throw new BicicletaNaoDisponivelException();
+        }
+    }
+
+    /**
+     * Altera o estado da bicicleta para em uso.
+     */
+    public void marcarEmUso() {
+        this.estado = EstadoBicicleta.EM_USO;
+    }
+
+    /**
+     * Altera o estado da bicicleta para disponivel.
+     */
+    public void marcarDisponivel() {
+        this.estado = EstadoBicicleta.DISPONIVEL;
+    }
+
+    /**
+     * Altera o estado da bicicleta para em manutencao.
+     */
+    public void marcarEmManutencao() {
+        this.estado = EstadoBicicleta.EM_MANUTENCAO;
     }
 
     void vincularEstacao(String idEstacao) {

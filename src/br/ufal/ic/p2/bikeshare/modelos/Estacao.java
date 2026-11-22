@@ -25,6 +25,15 @@ public class Estacao implements Serializable {
     private final int capacidade;
     private final Map<String, Bicicleta> bicicletasEstacionadas;
 
+    /**
+     * Cria uma nova estacao inicialmente vazia com a capacidade de vagas especificada.
+     *
+     * @param id         identificador unico da estacao
+     * @param nome       nome da estacao
+     * @param endereco   endereco da estacao
+     * @param capacidade capacidade total de vagas (inteiro positivo)
+     * @throws BikeShareException se algum campo obrigatorio for invalido
+     */
     public Estacao(String id, String nome, String endereco, int capacidade) throws BikeShareException {
         if (estaEmBranco(id)) {
             throw new IdentificacaoEstacaoNulaException();
@@ -49,26 +58,56 @@ public class Estacao implements Serializable {
         return valor == null || valor.trim().isEmpty();
     }
 
+    /**
+     * Retorna o identificador unico da estacao.
+     *
+     * @return identificador da estacao
+     */
     public String getId() {
         return id;
     }
 
+    /**
+     * Retorna o nome da estacao.
+     *
+     * @return nome da estacao
+     */
     public String getNome() {
         return nome;
     }
 
+    /**
+     * Retorna o endereco da estacao.
+     *
+     * @return endereco da estacao
+     */
     public String getEndereco() {
         return endereco;
     }
 
+    /**
+     * Retorna a capacidade maxima de bicicletas da estacao.
+     *
+     * @return capacidade total de vagas
+     */
     public int getCapacidade() {
         return capacidade;
     }
 
+    /**
+     * Indica se ha pelo menos uma vaga fisica livre na estacao.
+     *
+     * @return {@code true} se houver vaga disponivel
+     */
     public boolean possuiVaga() {
         return bicicletasEstacionadas.size() < capacidade;
     }
 
+    /**
+     * Retorna a quantidade de vagas fisicas livres na estacao.
+     *
+     * @return numero de vagas livres
+     */
     public int getVagasDisponiveis() {
         return capacidade - bicicletasEstacionadas.size();
     }
@@ -88,6 +127,12 @@ public class Estacao implements Serializable {
         return disponiveis;
     }
 
+    /**
+     * Verifica se uma bicicleta especifica esta estacionada nesta estacao.
+     *
+     * @param idBicicleta identificador da bicicleta
+     * @return {@code true} se a bicicleta estiver estacionada aqui
+     */
     public boolean contemBicicleta(String idBicicleta) {
         return bicicletasEstacionadas.containsKey(idBicicleta);
     }

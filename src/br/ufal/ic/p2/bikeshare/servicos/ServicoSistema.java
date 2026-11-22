@@ -14,12 +14,22 @@ public class ServicoSistema {
     private final EstadoSistema estado;
     private boolean encerrado;
 
+    /**
+     * Inicializa o servico carregando o estado previamente persistido em disco, se existir.
+     *
+     * @throws BikeShareException se ocorrer falha ao carregar os dados persistidos
+     */
     public ServicoSistema() throws BikeShareException {
         this.persistencia = new PersistenciaSistema();
         this.estado = persistencia.carregar();
         this.encerrado = false;
     }
 
+    /**
+     * Retorna o estado atual do sistema em memoria.
+     *
+     * @return instancia de {@link EstadoSistema}
+     */
     public EstadoSistema getEstado() {
         return estado;
     }

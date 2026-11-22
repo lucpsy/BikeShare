@@ -7,7 +7,10 @@ import br.ufal.ic.p2.bikeshare.excecoes.TipoBicicletaInvalidoException;
  */
 public enum TipoBicicleta {
 
+    /** Bicicleta convencional sem bateria. */
     CONVENCIONAL("convencional"),
+
+    /** Bicicleta eletrica com bateria e adicional por minuto. */
     ELETRICA("eletrica");
 
     private final String codigo;
@@ -16,6 +19,11 @@ public enum TipoBicicleta {
         this.codigo = codigo;
     }
 
+    /**
+     * Retorna o codigo textual do tipo de bicicleta.
+     *
+     * @return codigo do tipo
+     */
     public String getCodigo() {
         return codigo;
     }

@@ -18,6 +18,9 @@ public class PersistenciaSistema {
 
     private final Path caminhoArquivo;
 
+    /**
+     * Inicializa o gerenciador de persistencia apontando para o arquivo padrao de dados.
+     */
     public PersistenciaSistema() {
         this.caminhoArquivo = Paths.get(ARQUIVO_PADRAO);
     }

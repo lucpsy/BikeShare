@@ -12,6 +12,7 @@ import br.ufal.ic.p2.bikeshare.excecoes.NivelBateriaNuloException;
 import br.ufal.ic.p2.bikeshare.modelos.Bicicleta;
 import br.ufal.ic.p2.bikeshare.modelos.BicicletaConvencional;
 import br.ufal.ic.p2.bikeshare.modelos.BicicletaEletrica;
+import br.ufal.ic.p2.bikeshare.modelos.ConfiguracaoSistema;
 import br.ufal.ic.p2.bikeshare.modelos.Estacao;
 import br.ufal.ic.p2.bikeshare.modelos.TipoBicicleta;
 import br.ufal.ic.p2.bikeshare.persistencia.RepositorioBicicletas;
@@ -24,12 +25,22 @@ public class ServicoBicicleta {
 
     private final ServicoSistema servicoSistema;
 
+    /**
+     * Cria o servico de bicicletas vinculado ao gerenciador do ciclo de vida do sistema.
+     *
+     * @param servicoSistema servico que controla o estado e persistencia do sistema
+     */
     public ServicoBicicleta(ServicoSistema servicoSistema) {
         this.servicoSistema = servicoSistema;
     }
 
     /**
      * Adiciona uma bicicleta convencional a uma estacao.
+     *
+     * @param idEstacao   identificador da estacao
+     * @param idBicicleta identificador unico da bicicleta
+     * @param tipoTexto   codigo textual do tipo ({@code convencional})
+     * @throws BikeShareException se algum dado for invalido ou a estacao estiver sem vagas
      */
     public void adicionarBicicleta(String idEstacao, String idBicicleta, String tipoTexto)
             throws BikeShareException {
@@ -47,6 +58,12 @@ public class ServicoBicicleta {
 
     /**
      * Adiciona uma bicicleta eletrica (ou convencional sem bateria) a uma estacao.
+     *
+     * @param idEstacao         identificador da estacao
+     * @param idBicicleta       identificador unico da bicicleta
+     * @param tipoTexto         codigo textual do tipo ({@code convencional} ou {@code eletrica})
+     * @param nivelBateriaTexto nivel inicial de bateria (0 a 100 para eletrica, vazio para convencional)
+     * @throws BikeShareException se algum dado for invalido ou a estacao estiver sem vagas
      */
     public void adicionarBicicleta(String idEstacao, String idBicicleta, String tipoTexto, String nivelBateriaTexto)
             throws BikeShareException {
@@ -63,13 +80,22 @@ public class ServicoBicicleta {
             bicicleta = new BicicletaConvencional(idBicicleta);
         } else {
             int nivelBateria = ValidadorEntrada.parsearNivelBateria(nivelBateriaTexto);
-            bicicleta = new BicicletaEletrica(idBicicleta, nivelBateria);
+            bicicleta = new BicicletaEletrica(
+                    idBicicleta,
+                    nivelBateria,
+                    configuracao().getNivelMinimoBateriaEletrica(),
+                    configuracao().getAdicionalMinutoEletrica()
+            );
         }
         registrarNaEstacao(estacao, bicicleta);
     }
 
     /**
      * Remove uma bicicleta disponivel de uma estacao e do sistema.
+     *
+     * @param idEstacao   identificador da estacao onde a bicicleta esta estacionada
+     * @param idBicicleta identificador da bicicleta a remover
+     * @throws BikeShareException se a estacao ou bicicleta nao existir, nao estiver na estacao ou nao estiver disponivel
      */
     public void removerBicicleta(String idEstacao, String idBicicleta) throws BikeShareException {
         servicoSistema.garantirAtivo();
@@ -88,6 +114,11 @@ public class ServicoBicicleta {
 
     /**
      * Consulta um atributo especifico de uma bicicleta cadastrada.
+     *
+     * @param idBicicleta identificador da bicicleta
+     * @param atributo    nome exato do atributo solicitado
+     * @return valor textual do atributo
+     * @throws BikeShareException se a bicicleta ou atributo for invalido
      */
     public String getAtributoBicicleta(String idBicicleta, String atributo) throws BikeShareException {
         servicoSistema.garantirAtivo();
@@ -97,6 +128,10 @@ public class ServicoBicicleta {
 
     /**
      * Consulta o estado atual de uma bicicleta cadastrada.
+     *
+     * @param idBicicleta identificador da bicicleta
+     * @return codigo textual do estado atual
+     * @throws BikeShareException se a bicicleta nao existir
      */
     public String getEstadoBicicleta(String idBicicleta) throws BikeShareException {
         servicoSistema.garantirAtivo();
@@ -126,6 +161,10 @@ public class ServicoBicicleta {
         ValidadorEntrada.validarIdentificacaoBicicleta(idBicicleta);
         return repositorioBicicletas().buscarPorId(idBicicleta)
                 .orElseThrow(BicicletaNaoExisteException::new);
+    }
+
+    private ConfiguracaoSistema configuracao() {
+        return servicoSistema.getEstado().getConfiguracao();
     }
 
     private RepositorioEstacoes repositorioEstacoes() {

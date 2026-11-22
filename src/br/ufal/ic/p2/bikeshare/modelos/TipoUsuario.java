@@ -7,7 +7,10 @@ import br.ufal.ic.p2.bikeshare.excecoes.TipoUsuarioInvalidoException;
  */
 public enum TipoUsuario {
 
+    /** Usuario pessoa fisica identificado por CPF. */
     PESSOA_FISICA("pessoaFisica"),
+
+    /** Usuario pessoa juridica identificado por CNPJ e razao social. */
     PESSOA_JURIDICA("pessoaJuridica");
 
     private final String codigo;
@@ -16,6 +19,11 @@ public enum TipoUsuario {
         this.codigo = codigo;
     }
 
+    /**
+     * Retorna o codigo textual do tipo de usuario.
+     *
+     * @return codigo do tipo
+     */
     public String getCodigo() {
         return codigo;
     }

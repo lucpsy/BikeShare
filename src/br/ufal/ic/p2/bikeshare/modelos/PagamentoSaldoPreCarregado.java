@@ -1,5 +1,6 @@
 package br.ufal.ic.p2.bikeshare.modelos;
 
+import br.ufal.ic.p2.bikeshare.excecoes.SaldoInsuficienteException;
 import br.ufal.ic.p2.bikeshare.excecoes.ValorNaoPositivoException;
 import br.ufal.ic.p2.bikeshare.excecoes.ValorNuloException;
 
@@ -14,6 +15,9 @@ public class PagamentoSaldoPreCarregado extends MetodoPagamento {
 
     private BigDecimal saldo;
 
+    /**
+     * Inicializa a carteira de saldo pre-carregado com saldo zerado.
+     */
     public PagamentoSaldoPreCarregado() {
         this.saldo = BigDecimal.ZERO;
     }
@@ -30,7 +34,6 @@ public class PagamentoSaldoPreCarregado extends MetodoPagamento {
 
     @Override
     public void validarUsoDeSaldo() {
-        // Metodo de pagamento e saldo pre-carregado: valido.
     }
 
     @Override
@@ -42,5 +45,23 @@ public class PagamentoSaldoPreCarregado extends MetodoPagamento {
             throw new ValorNaoPositivoException();
         }
         this.saldo = this.saldo.add(valor);
+    }
+
+    @Override
+    public void validarAutorizacaoRetirada() throws SaldoInsuficienteException {
+        if (saldo.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new SaldoInsuficienteException();
+        }
+    }
+
+    @Override
+    public void cobrar(BigDecimal valor) throws SaldoInsuficienteException {
+        if (valor == null || valor.compareTo(BigDecimal.ZERO) <= 0) {
+            return;
+        }
+        if (saldo.compareTo(valor) < 0) {
+            throw new SaldoInsuficienteException();
+        }
+        this.saldo = this.saldo.subtract(valor);
     }
 }

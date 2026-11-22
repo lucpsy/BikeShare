@@ -22,6 +22,9 @@ public class RepositorioUsuarios implements Serializable {
     private final Map<String, String> idsPorEmailNormalizado;
     private int proximoNumeroId;
 
+    /**
+     * Inicializa o repositorio de usuarios vazio com contador sequencial a partir de 1.
+     */
     public RepositorioUsuarios() {
         this.usuariosPorId = new LinkedHashMap<>();
         this.idsPorEmailNormalizado = new HashMap<>();

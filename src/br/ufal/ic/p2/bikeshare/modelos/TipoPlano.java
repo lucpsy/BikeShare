@@ -7,7 +7,10 @@ import br.ufal.ic.p2.bikeshare.excecoes.PlanoInvalidoException;
  */
 public enum TipoPlano {
 
+    /** Plano avulso sem mensalidade. */
     AVULSO("avulso"),
+
+    /** Plano por assinatura com franquia gratuita e mensalidade. */
     ASSINANTE("assinante");
 
     private final String codigo;
@@ -16,6 +19,11 @@ public enum TipoPlano {
         this.codigo = codigo;
     }
 
+    /**
+     * Retorna o codigo textual do plano.
+     *
+     * @return codigo do plano
+     */
     public String getCodigo() {
         return codigo;
     }

@@ -19,6 +19,9 @@ public class RepositorioEstacoes implements Serializable {
     private final Map<String, Estacao> estacoesPorId;
     private int proximoNumeroId;
 
+    /**
+     * Inicializa o repositorio de estacoes vazio com contador sequencial a partir de 1.
+     */
     public RepositorioEstacoes() {
         this.estacoesPorId = new LinkedHashMap<>();
         this.proximoNumeroId = 1;

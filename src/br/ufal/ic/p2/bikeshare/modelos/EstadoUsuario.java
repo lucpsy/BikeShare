@@ -5,7 +5,11 @@ package br.ufal.ic.p2.bikeshare.modelos;
  */
 public enum EstadoUsuario {
 
-    ATIVO("ativo");
+    /** Usuario regular autorizado a retirar bicicletas. */
+    ATIVO("ativo"),
+
+    /** Usuario com pendencias financeiras e bloqueado para novas retiradas. */
+    INADIMPLENTE("inadimplente");
 
     private final String codigo;
 
@@ -13,6 +17,11 @@ public enum EstadoUsuario {
         this.codigo = codigo;
     }
 
+    /**
+     * Retorna o codigo textual do estado do usuario.
+     *
+     * @return codigo do estado
+     */
     public String getCodigo() {
         return codigo;
     }

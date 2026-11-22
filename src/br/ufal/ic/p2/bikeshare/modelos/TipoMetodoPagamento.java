@@ -7,8 +7,13 @@ import br.ufal.ic.p2.bikeshare.excecoes.ValorMetodoPagamentoInvalidoException;
  */
 public enum TipoMetodoPagamento {
 
+    /** Pagamento por cartao de credito ou debito. */
     CARTAO("cartao"),
+
+    /** Pagamento via chave Pix. */
     PIX("pix"),
+
+    /** Pagamento por saldo pre-carregado na conta do usuario. */
     SALDO_PRE_CARREGADO("saldoPreCarregado");
 
     private final String codigo;
@@ -17,6 +22,11 @@ public enum TipoMetodoPagamento {
         this.codigo = codigo;
     }
 
+    /**
+     * Retorna o codigo textual do metodo de pagamento.
+     *
+     * @return codigo do metodo
+     */
     public String getCodigo() {
         return codigo;
     }
